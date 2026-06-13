@@ -1,0 +1,72 @@
+// /backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CrawlStatus {
+  PENDING
+  CRAWLED
+  ERROR
+}
+
+model Page {
+  id          String      @id @default(uuid())
+  url         String      @unique
+  title       String?
+  content     String?     @db.Text
+  status      CrawlStatus @default(PENDING)
+  isIndexed   Boolean     @default(false)
+
+  // Relations
+  linksOut    Link[]      @relation("SourcePage")
+  linksIn     Link[]      @relation("TargetPage")
+  wordIndices PageIndex[] 
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Indexes for fast background processing sweeps
+  @@index([status])
+  @@index([isIndexed]) 
+}
+
+model Link {
+  id        String   @id @default(uuid())
+  sourceId  String
+  targetId  String
+
+  source    Page     @relation("SourcePage", fields: [sourceId], references: [id], onDelete: Cascade)
+  target    Page     @relation("TargetPage", fields: [targetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  // Prevents duplicate edges and speeds up reverse lookups
+  @@unique([sourceId, targetId])
+  @@index([targetId])
+}
+
+model Word {
+  id          String      @id @default(uuid())
+  text        String      @unique 
+  pageIndices PageIndex[]
+}
+
+model PageIndex {
+  id        String @id @default(uuid())
+  wordId    String
+  pageId    String
+  count     Int    // Term Frequency (TF): How many times this word appears on the page
+
+  word      Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  page      Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  // Ensures we only have one score per word-page combination
+  @@unique([wordId, pageId])
+  @@index([pageId])
+}
