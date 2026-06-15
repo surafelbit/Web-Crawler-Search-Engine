@@ -1,4 +1,3 @@
-// /backend/prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -23,7 +22,6 @@ model Page {
   status      CrawlStatus @default(PENDING)
   isIndexed   Boolean     @default(false)
 
-  // Relations
   linksOut    Link[]      @relation("SourcePage")
   linksIn     Link[]      @relation("TargetPage")
   wordIndices PageIndex[] 
@@ -31,7 +29,6 @@ model Page {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  // Indexes for fast background processing sweeps
   @@index([status])
   @@index([isIndexed]) 
 }
