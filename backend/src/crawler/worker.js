@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
-import { PrismaClient } from "@prisma/client";
-import * as cheerio from "cheerio";
+import pkg from "@prisma/client";
+const { PrismaClient } = pkg; // ✅ This works perfectly with Node's ESM loaderimport * as cheerio from "cheerio";
 import axios from "axios";
 import { URL } from "url";
 import { REDIS_OPTIONS, crawlQueue } from "../queue/connection.js";
