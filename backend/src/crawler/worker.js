@@ -9,18 +9,27 @@ import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
-console.log("📍 [CHECKPOINT 1] Imports loaded successfully.");
+// ... top imports and Prisma setup remain the same ...
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
-const adapter = new PrismaPg(pool);
-const prisma = new PrismaClient({ adapter });
+console.log("📍 [CHECKPOINT 3] BullMQ Worker instantiated.");
 
-console.log("📍 [CHECKPOINT 2] Database Driver & Prisma Client ready.");
-
+// Use crawlQueue.name to guarantee the worker and seed script use the EXACT same queue room
 const worker = new Worker(
-  "crawl-queue",
+  crawlQueue.name, // 🔥 Changed from 'crawl-queue' to match your system setup
   async (job) => {
-    // ... leave the entire internal async (job) code exactly as it is ...
+    // 🚨 ADD THIS LOG LINE RIGHT HERE:
+    console.log(
+      `👉 [QUEUE ALERT] Worker just grabbed job ${job.id}! Processing URL: ${job.data.url}`,
+    );
+
+    try {
+      // ... your existing scraping/crawling code goes here ...
+      // const savedPage = await prisma.page.upsert({ ... })
+      // ...
+    } catch (error) {
+      console.error(`❌ Error processing job ${job.id}:`, error);
+      throw error;
+    }
   },
   {
     connection: REDIS_OPTIONS,
@@ -32,7 +41,4 @@ const worker = new Worker(
   },
 );
 
-console.log("📍 [CHECKPOINT 3] BullMQ Worker instantiated.");
 console.log("🤖 Crawler Worker is online and listening for jobs...");
-
-// ... leave the graceful shutdown code at the bottom as it is ...
