@@ -3,10 +3,10 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import cors from "cors";
-import { dotenvx } from "@dotenvx/dotenvx"; // injects your .env variables
+import { dotenvx } from "@dotenvx/dotenvx";
 
 const app = express();
-app.use(cors()); // Allows your future frontend to talk to this API
+app.use(cors());
 app.use(express.json());
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
@@ -26,8 +26,6 @@ app.get("/api/search", async (req, res) => {
   try {
     console.log(`🔎 User searched for: "${q}"`);
 
-    // Fetch matching pages from PostgreSQL
-    // We search both the title and content fields for the keyword
     const results = await prisma.page.findMany({
       where: {
         OR: [
@@ -35,7 +33,7 @@ app.get("/api/search", async (req, res) => {
           { content: { contains: q, mode: "insensitive" } },
         ],
       },
-      take: 10, // Limit to the top 10 most relevant results
+      take: 10,
     });
 
     res.json({
