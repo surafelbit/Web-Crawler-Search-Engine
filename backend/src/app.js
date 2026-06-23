@@ -3,7 +3,7 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import cors from "cors";
-
+import "dotenv/config"; // 🔥 Automatically finds and loads your .env file
 const app = express();
 app.use(cors());
 app.use(express.json());
