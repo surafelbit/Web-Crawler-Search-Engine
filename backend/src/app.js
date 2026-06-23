@@ -3,7 +3,6 @@ import { PrismaClient } from "./generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import cors from "cors";
-import { dotenvx } from "@dotenvx/dotenvx";
 
 const app = express();
 app.use(cors());
