@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DocuTrace — Intelligent Web Search Engine</title>
+  <meta name="description" content="Modern, fast, and intelligent web search engine interface for DocuTrace Web Crawler.">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="main-header">
+      <div class="logo-container" id="logo-home">
+        <div class="logo-icon">
+          <i class="fa-solid fa-compass"></i>
+        </div>
+        <div class="logo-text">
+          <span class="logo-title">DocuTrace</span>
+          <span class="logo-tag">SEARCH</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="api-status-badge" id="api-status" title="Connecting to http://localhost:5000">
+          <span class="status-dot pulsing"></span>
+          <span class="status-text">Checking API...</span>
+        </div>
+        
+        <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Search Hero Box -->
+      <section class="hero-section" id="hero-section">
+        <div class="hero-header">
+          <h1 class="hero-title">Search Indexed Documents</h1>
+          <p class="hero-subtitle">Discover crawled pages, technical documentation, and web data instantly.</p>
+        </div>
+
+        <form class="search-form" id="search-form">
+          <div class="search-box-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-box-icon"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              class="search-input" 
+              placeholder="Search by keywords, URLs, or topics... (Press '/' to focus)" 
+              autocomplete="off"
+              spellcheck="false"
+              required
+            >
+            <button type="button" class="clear-btn" id="clear-btn" aria-label="Clear input" style="display: none;">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="keyboard-shortcut"><kbd>/</kbd></div>
+            <button type="submit" class="search-btn" id="search-submit-btn">
+              <span>Search</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick Tags -->
+        <div class="quick-tags">
+          <span class="quick-tags-label"><i class="fa-solid fa-fire"></i> Popular:</span>
+          <div class="tags-list">
+            <button class="tag-chip" data-query="useState">useState</button>
+            <button class="tag-chip" data-query="prisma">prisma</button>
+            <button class="tag-chip" data-query="express">express</button>
+            <button class="tag-chip" data-query="crawler">crawler</button>
+            <button class="tag-chip" data-query="javascript">javascript</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Header / Filter Toolbar -->
+      <section class="results-toolbar" id="results-toolbar" style="display: none;">
+        <div class="results-info">
+          <span class="results-count" id="results-count">0 results</span>
+          <span class="search-time" id="search-time">in 0ms</span>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="view-mode-selector">
+            <button class="view-btn active" id="view-detailed" title="Detailed View">
+              <i class="fa-solid fa-list-ul"></i>
+            </button>
+            <button class="view-btn" id="view-compact" title="Compact View">
+              <i class="fa-solid fa-table-cells-large"></i>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Skeleton Loading Container -->
+      <section class="skeleton-container" id="skeleton-container" style="display: none;">
+        <div class="skeleton-card">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line url"></div>
+          <div class="skeleton-line body"></div>
+          <div class="skeleton-line body short"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line url"></div>
+          <div class="skeleton-line body"></div>
+          <div class="skeleton-line body short"></div>
+        </div>
+        <div class="skeleton-card">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line url"></div>
+          <div class="skeleton-line body"></div>
+        </div>
+      </section>
+
+      <!-- Results Container -->
+      <section class="results-container list-view" id="results-container">
+        <!-- Results dynamically inserted here -->
+      </section>
+
+      <!-- Empty State -->
+      <section class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-icon">
+          <i class="fa-solid fa-ghost"></i>
+        </div>
+        <h3>No matching results found</h3>
+        <p>Try refining your search query or check spelling.</p>
+      </section>
+    </main>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">Link copied to clipboard!</div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+      <p>Powered by <strong>DocuTrace Engine</strong> • Express + Prisma + Web Crawler</p>
+      <div class="footer-links">
+        <span><i class="fa-regular fa-keyboard"></i> Shortcuts: <kbd>/</kbd> Focus search • <kbd>Esc</kbd> Clear</span>
+      </div>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

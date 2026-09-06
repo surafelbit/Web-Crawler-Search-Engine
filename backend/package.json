@@ -16,7 +16,9 @@
     "axios": "^1.17.0",
     "bullmq": "^5.78.0",
     "cheerio": "^1.2.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
+    "express": "^4.19.2",
     "pg": "^8.22.0"
   },
   "devDependencies": {
