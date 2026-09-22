@@ -568,6 +568,11 @@ kbd {
   font-size: 0.93rem;
   line-height: 1.55;
   margin-bottom: 14px;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 mark.match-highlight {

@@ -189,17 +189,17 @@ async function performSearch(query) {
       apiStatusBadge.querySelector(".status-text").textContent = "API Live (Port 5000)";
     }
   } catch (e) {
-    console.warn("Backend API unreachable, using client search engine engine...");
+    console.warn("Backend API unreachable, using client search engine demo mode...");
   }
 
-  // Fallback to client mock search if API returned empty or failed
-  if (!isFromApi || results.length === 0) {
+  // Fallback to client mock search ONLY if API was unreachable
+  if (!isFromApi) {
     results = DEMO_DATABASE.filter(item => {
       const q = query.toLowerCase();
       return (
-        item.title.toLowerCase().includes(q) ||
-        item.content.toLowerCase().includes(q) ||
-        item.url.toLowerCase().includes(q)
+        (item.title && item.title.toLowerCase().includes(q)) ||
+        (item.content && item.content.toLowerCase().includes(q)) ||
+        (item.url && item.url.toLowerCase().includes(q))
       );
     });
   }
@@ -237,10 +237,12 @@ function renderResults(results, query, duration) {
   emptyState.style.display = "none";
   
   const cardsHtml = results.map(item => {
-    const highlightedTitle = highlightKeyword(escapeHtml(item.title), query);
-    const highlightedSnippet = highlightKeyword(escapeHtml(item.content), query);
+    const rawTitle = (item.title && item.title.trim()) || item.url || "Untitled Document";
+    const rawSnippet = createSnippet(item.content, query, 260);
+    const highlightedTitle = highlightKeyword(escapeHtml(rawTitle), query);
+    const highlightedSnippet = highlightKeyword(escapeHtml(rawSnippet), query);
     const domain = getDomainName(item.url);
-    const formattedDate = formatDate(item.crawledAt || new Date());
+    const formattedDate = formatDate(item.crawledAt || item.createdAt || item.updatedAt);
 
     return `
       <article class="result-card">
@@ -283,6 +285,47 @@ function renderResults(results, query, duration) {
   });
 }
 
+// Create contextual snippet around matching query
+function createSnippet(content, query, maxLength = 240) {
+  if (!content) return "No preview content available.";
+  
+  // Collapse whitespace
+  const clean = content.replace(/\s+/g, " ").trim();
+  if (!query) {
+    return clean.length > maxLength ? clean.slice(0, maxLength) + "..." : clean;
+  }
+
+  const lowerContent = clean.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const matchIndex = lowerContent.indexOf(lowerQuery);
+
+  if (matchIndex === -1) {
+    return clean.length > maxLength ? clean.slice(0, maxLength) + "..." : clean;
+  }
+
+  // Calculate snippet window around the match
+  const radius = Math.floor((maxLength - query.length) / 2);
+  let startIndex = Math.max(0, matchIndex - radius);
+  let endIndex = Math.min(clean.length, matchIndex + query.length + radius);
+
+  if (startIndex === 0) {
+    endIndex = Math.min(clean.length, maxLength);
+  } else if (endIndex === clean.length) {
+    startIndex = Math.max(0, clean.length - maxLength);
+  }
+
+  let snippet = clean.slice(startIndex, endIndex);
+
+  if (startIndex > 0) {
+    snippet = "..." + snippet;
+  }
+  if (endIndex < clean.length) {
+    snippet = snippet + "...";
+  }
+
+  return snippet;
+}
+
 // Highlight Keyword Helper
 function highlightKeyword(text, query) {
   if (!query) return text;
@@ -310,8 +353,10 @@ function getDomainName(urlStr) {
 }
 
 function formatDate(dateString) {
+  if (!dateString) return "Recently";
   try {
     const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "Recently";
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
   } catch (e) {
     return "Recently";
