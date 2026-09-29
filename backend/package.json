@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "node src/app.js",
     "worker": "node src/crawler/worker.js",
-    "seed": "node test-crawl.js",
-    "test": "node --test"
+    "seed": "node scripts/seed-crawl.js",
+    "test": "node --test tests/*.test.js"
   },
   "keywords": [],
   "author": "",
