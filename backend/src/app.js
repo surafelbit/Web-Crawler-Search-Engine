@@ -7,6 +7,7 @@ import "dotenv/config";
 import { normalizeSearchQuery } from "./utils/searchQuery.js";
 
 const app = express();
+app.disable("x-powered-by");
 app.use(cors());
 app.use(express.json());
 
@@ -37,8 +38,10 @@ app.get("/api/search", async (req, res) => {
     ? Math.min(Math.max(requestedLimit, 1), 50)
     : 10;
 
-  if (!query) {
-    return res.status(400).json({ error: "Search query is required." });
+  if (!query || query.length < 2) {
+    return res.status(400).json({
+      error: "Search query must be at least 2 characters long.",
+    });
   }
 
   try {
@@ -66,6 +69,15 @@ app.get("/api/search", async (req, res) => {
       .status(500)
       .json({ error: "Internal server error occurred during search." });
   }
+});
+
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found." });
+});
+
+app.use((error, _req, res, _next) => {
+  console.error("Unhandled API error:", error);
+  res.status(500).json({ error: "Something went wrong on the server." });
 });
 
 const server = app.listen(PORT, () => {

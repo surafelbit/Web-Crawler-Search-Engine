@@ -31,13 +31,26 @@ console.log("🔌 Database & Redis systems prepared.");
 const worker = new Worker(
   crawlQueue.name,
   async (job) => {
+    const targetUrl =
+      typeof job?.data?.url === "string" ? job.data.url.trim() : "";
+
+    if (!targetUrl) {
+      throw new Error("Job is missing a valid URL.");
+    }
+
+    try {
+      new URL(targetUrl);
+    } catch {
+      throw new Error(`Invalid URL provided to crawler: ${targetUrl}`);
+    }
+
     console.log(
-      `\n👉 [QUEUE ALERT] Worker processing Job #${job.id} | URL: ${job.data.url}`,
+      `\n👉 [QUEUE ALERT] Worker processing Job #${job.id} | URL: ${targetUrl}`,
     );
 
     try {
       console.log("📡 Step 1: Sending Axios request to fetch HTML...");
-      const response = await axios.get(job.data.url, {
+      const response = await axios.get(targetUrl, {
         timeout: 10000,
         maxContentLength: 10 * 1024 * 1024, // 10MB safety limit
         headers: {
@@ -54,7 +67,7 @@ const worker = new Worker(
         !contentType.includes("application/xhtml+xml")
       ) {
         console.log(
-          `⏩ Skipping non-HTML content (${contentType}): ${job.data.url}`,
+          `⏩ Skipping non-HTML content (${contentType}): ${targetUrl}`,
         );
         return;
       }
@@ -93,14 +106,14 @@ const worker = new Worker(
       );
 
       await prisma.page.upsert({
-        where: { url: job.data.url },
+        where: { url: targetUrl },
         update: {
           title,
           content: cleanText,
           status: "CRAWLED",
         },
         create: {
-          url: job.data.url,
+          url: targetUrl,
           title,
           content: cleanText,
           status: "CRAWLED",
@@ -108,7 +121,7 @@ const worker = new Worker(
       });
 
       console.log(
-        `✅ Step 5: Page successfully saved as CRAWLED for ${job.data.url}`,
+        `✅ Step 5: Page successfully saved as CRAWLED for ${targetUrl}`,
       );
     } catch (error) {
       console.error(`\n❌ ERROR caught inside job handler for Job ${job.id}:`);
@@ -123,9 +136,9 @@ const worker = new Worker(
       // Record error status in database
       try {
         await prisma.page.upsert({
-          where: { url: job.data.url },
+          where: { url: targetUrl },
           update: { status: "ERROR" },
-          create: { url: job.data.url, status: "ERROR" },
+          create: { url: targetUrl, status: "ERROR" },
         });
       } catch (dbErr) {
         console.error("Failed to mark page as ERROR in DB:", dbErr.message);
