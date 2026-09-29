@@ -1,4 +1,4 @@
-import { crawlQueue } from "./src/queue/connection.js";
+import { crawlQueue } from "../src/queue/connection.js";
 
 async function seed() {
   const rootUrl = "https://react.dev/reference/react";
