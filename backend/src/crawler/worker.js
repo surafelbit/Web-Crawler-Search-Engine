@@ -7,9 +7,22 @@ import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL is not set. Add it to backend/.env before starting the worker.");
+}
+
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
+
+const shutdown = async (signal) => {
+  console.log(`🛑 Worker received ${signal}; shutting down gracefully...`);
+  await Promise.allSettled([prisma.$disconnect(), pool.end()]);
+  process.exit(0);
+};
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 console.log("🔌 Database & Redis systems prepared.");
 
