@@ -11,7 +11,9 @@ app.use(cors());
 app.use(express.json());
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set. Add it to backend/.env before starting the API.");
+  throw new Error(
+    "DATABASE_URL is not set. Add it to backend/.env before starting the API.",
+  );
 }
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });

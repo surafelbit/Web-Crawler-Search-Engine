@@ -8,7 +8,9 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is not set. Add it to backend/.env before starting the worker.");
+  throw new Error(
+    "DATABASE_URL is not set. Add it to backend/.env before starting the worker.",
+  );
 }
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
@@ -39,8 +41,10 @@ const worker = new Worker(
         timeout: 10000,
         maxContentLength: 10 * 1024 * 1024, // 10MB safety limit
         headers: {
-          "User-Agent": "DocuTraceBot/1.0 (+https://github.com/surafelbit/Web-Crawler-Search-Engine)",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "User-Agent":
+            "DocuTraceBot/1.0 (+https://github.com/surafelbit/Web-Crawler-Search-Engine)",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         },
       });
 
@@ -64,7 +68,9 @@ const worker = new Worker(
       const $ = cheerio.load(html);
 
       // Strip non-content and boilerplate elements before extracting text
-      $("script, style, noscript, svg, nav, footer, header, iframe, button, dialog").remove();
+      $(
+        "script, style, noscript, svg, nav, footer, header, iframe, button, dialog",
+      ).remove();
 
       const rawTitle =
         $("title").first().text().trim() ||
@@ -101,7 +107,9 @@ const worker = new Worker(
         },
       });
 
-      console.log(`✅ Step 5: Page successfully saved as CRAWLED for ${job.data.url}`);
+      console.log(
+        `✅ Step 5: Page successfully saved as CRAWLED for ${job.data.url}`,
+      );
     } catch (error) {
       console.error(`\n❌ ERROR caught inside job handler for Job ${job.id}:`);
       if (error.code === "ECONNABORTED") {
