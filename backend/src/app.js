@@ -50,7 +50,7 @@ app.get("/api/search", async (req, res) => {
       error: "Search query must be at least 2 characters long.",
     });
   }
-
+//
   try {
     console.log(`🔎 User searched for: "${query}"`);
 
