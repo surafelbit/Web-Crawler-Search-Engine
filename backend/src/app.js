@@ -6,7 +6,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { normalizeSearchQuery } from "./utils/searchQuery.js";
+import createSearchRouter from "./api/search.js";
 
 // Ensure we load the .env located in the backend folder (not the repository root)
 const __filename = fileURLToPath(import.meta.url);
@@ -38,45 +38,7 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-app.get("/api/search", async (req, res) => {
-  const query = normalizeSearchQuery(req.query.q);
-  const requestedLimit = Number(req.query.limit);
-  const safeLimit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(requestedLimit, 1), 50)
-    : 10;
-
-  if (!query || query.length < 2) {
-    return res.status(400).json({
-      error: "Search query must be at least 2 characters long.",
-    });
-  }
-//
-  try {
-    console.log(`🔎 User searched for: "${query}"`);
-
-    const results = await prisma.page.findMany({
-      where: {
-        OR: [
-          { title: { contains: query, mode: "insensitive" } },
-          { content: { contains: query, mode: "insensitive" } },
-        ],
-      },
-      take: safeLimit,
-    });
-
-    res.json({
-      query,
-      count: results.length,
-      limit: safeLimit,
-      data: results,
-    });
-  } catch (error) {
-    console.error("❌ Search API Error:", error);
-    res
-      .status(500)
-      .json({ error: "Internal server error occurred during search." });
-  }
-});
+app.use("/api", createSearchRouter(prisma));
 
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found." });
