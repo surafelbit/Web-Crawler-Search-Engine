@@ -38,7 +38,9 @@ export default function createSearchRouter(prisma) {
       });
     } catch (error) {
       console.error("❌ Search API Error:", error);
-      res.status(500).json({ error: "Internal server error occurred during search." });
+      res
+        .status(500)
+        .json({ error: "Internal server error occurred during search." });
     }
   });
 
